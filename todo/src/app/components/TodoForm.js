@@ -25,7 +25,7 @@ return(
 <input value={title}onChange={(e)=>setTitle(e.target.value)}placeholder="Task Name"className="border p-2 rounded bg-white"/>
 <input type="date" min={new Date().toISOString().split("T")[0]} value={date}onChange={(e)=>setDate(e.target.value)}className="border p-2 rounded bg-white"/>
 {error && <p className="text-red-500 text-sm">{error}</p>}
-<button className="bg-blue-600 text-white py-2 rounded">{isEdit ? "Update" : "Add"}</button>
+<button className="bg-blue-600 text-white py-2 rounded">{isEdit ? "Update" : "Add"} </button>
 </form>
 </div>
 )
