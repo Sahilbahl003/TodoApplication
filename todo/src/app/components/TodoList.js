@@ -1,159 +1,110 @@
 "use client";
-
-import { useState } from "react";
-
+import { useState } from "react";import { useRouter } from "next/navigation";import { MdModeEditOutline } from "react-icons/md";import { RiDeleteBin6Fill } from "react-icons/ri";
 export default function TodoList({ initialTodos }) {
- const [todos, setTodos] = useState(initialTodos);
- const [title, setTitle] = useState("");
-
- const [editingId, setEditingId] = useState(null);
-const [editTitle, setEditTitle] = useState("");
-
- async function addTodo() {
- const res = await fetch("/api/todos", {
- method: "POST",
- body: JSON.stringify({ title }),
- });
-
- const newTodo = await res.json();
- setTodos([newTodo, ...todos]);
- setTitle("");
- }
-
- async function deleteTodo(id) {
- await fetch(`/api/todos/${id}`, { method: "DELETE" });
-
- setTodos(todos.filter(t => t.id !== id));
- }
-
- async function toggleTodo(todo) {
- const res = await fetch(`/api/todos/${todo.id}`, {
- method: "PUT",
- body: JSON.stringify({
- title: todo.title,
- completed: !todo.completed
- })
- });
-
- const updated = await res.json();
-
- setTodos(
- todos.map(t => (t.id === updated.id ? updated : t))
- );
- }
-
- async function updateTodo(id) {
-
-  const todo = todos.find(t => t.id === id);
-
-  const res = await fetch(`/api/todos/${id}`, {
-    method: "PUT",
-    body: JSON.stringify({
-      title: editTitle,
-      completed: todo.completed
-    })
-  });
-
-  const updated = await res.json();
-
-  setTodos(
-    todos.map(t => (t.id === updated.id ? updated : t))
-  );
-
-  setEditingId(null);
+const router = useRouter();
+const [todos, setTodos] = useState(initialTodos);const [selectedDate, setSelectedDate] = useState("");const [search, setSearch] = useState("");const [activeTab, setActiveTab] = useState("active");
+/* FORMAT DATE */
+function formatDate(date){if(!date) return ""
+const [year,month,day] = date.split("T")[0].split("-")
+return `${day}/${month}/${year.slice(-2)}`}
+/* DELETE */
+async function deleteTodo(id){await fetch(`/api/todos/${id}`,{method:"DELETE"});setTodos(prev => prev.filter(t => t.id !== id));}
+/* TOGGLE */
+async function toggleTodo(todo){
+const res = await fetch(`/api/todos/${todo.id}`,{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify({title:todo.title,completed:!todo.completed,todo_date:todo.todo_date?.split("T")[0]})})
+const updated = await res.json()
+setTodos(prev =>prev.map(t => t.id === updated.id ? updated : t))
 }
+/* UNIQUE DATES FOR DROPDOWN */
+const dates = [...new Set(todos.map(t => t.todo_date?.slice(0,10)))]
+/* FILTER TODOS */
+const filteredTodos = todos.filter(todo => {
+const rawDate = todo.todo_date?.split("T")[0]
+const matchDate = selectedDate ? rawDate === selectedDate : true
+const matchSearch = todo.title.toLowerCase().includes(search.toLowerCase())
+const matchTab =activeTab === "active"? !todo.completed: todo.completed
+return matchDate && matchSearch && matchTab
+})
+/* GROUP BY DATE */
+const groupedTodos = filteredTodos.reduce((acc,todo)=>{
+const dateKey = todo.todo_date?.split("T")[0]
+if(!acc[dateKey]){acc[dateKey] = []}
+acc[dateKey].push(todo)
+return acc
+},{})
+/* SORT DATES */
+const sortedDates = Object.keys(groupedTodos).sort((a,b)=> new Date(a) - new Date(b))
+return (
+<div className="w-[1200px] p-10 rounded-xl mt-5 mx-auto p-6 bg-blue-50">
+{/* TOP BAR */}
+<div className="flex items-center justify-between mb-6">
 
+  {/* LEFT SIDE */}
+  <div className="flex items-center gap-3">
 
- return (
- <div >
+    <select
+      className="border p-2 rounded-md bg-white"
+      value={selectedDate}
+      onChange={(e)=>setSelectedDate(e.target.value)}
+    >
+      <option value="">All Dates</option>
+      {dates.map(d=>(
+        <option key={d} value={d}>
+          {formatDate(d)}
+        </option>
+      ))}
+    </select>
 
-<div className="flex items-center justify-center">
     <input
- value={title}
- onChange={e => setTitle(e.target.value)}
- placeholder="New Todo"
- className="border-2"
- maxLength={30}
- />
+      placeholder="Search List"
+      value={search}
+      onChange={(e)=>setSearch(e.target.value)}
+      className="border px-3 py-2 rounded-md bg-white"
+    />
 
- <button onClick={addTodo} className="bg-blue-500 px-4 py-2 rounded-md ml-2 text-white">Add</button>
+  </div>
+
+  {/* RIGHT SIDE */}
+  <button
+    onClick={()=>router.push("/todo/new")}
+    className="bg-blue-600 text-white px-4 py-2 rounded-md ml-4"
+  >
+    + Add New
+  </button>
+
 </div>
- 
-
- <div className="bg-zinc-200 text-zinc-700 mt-2 p-2 flex justify-between">
-    <span>No.</span>
-    <span>Title</span>
-    <span>Status</span>
-    <span>Action</span>
- </div>
-
-
- <ul>
-  {todos.map(todo => (
-    <li key={todo.id} className="bg-amber-100 mt-2 px-2 py-1 flex justify-between">
-
-      {editingId === todo.id ? (
-
-        < div className="flex gap-2 ">
-          <span className="bg-white p-1 rounded-full">{todo.id}</span>
-          <input
-            value={editTitle}
-            onChange={(e)=>setEditTitle(e.target.value)}
-            className="border-2 bg-white rounded-md"
-            maxLength={30}
-          />
-
-          <button className="bg-green-500 px-2 py-1 rounded-md text-white" onClick={()=>updateTodo(todo.id)}>
-            Save
-          </button>
-        </div>
-
-      ) : (
-
-        <>
-
-          <div className="flex gap-2">
-            <input
-  type="checkbox"
-  checked={todo.completed}
-  onChange={() => toggleTodo(todo)}
-/>
-
-<span className="p-1 bg-white rounded-full">{todo.id}</span>
-
-
+{/* TABS */}
+<div className="flex gap-6 mb-6">
+<button onClick={()=>setActiveTab("active")}className={`pb-1 border-b-2 ${activeTab==="active"? "border-blue-600 font-semibold": "border-transparent"}`}>Active Task</button>
+<button onClick={()=>setActiveTab("completed")}className={`pb-1 border-b-2 ${activeTab==="completed"? "border-green-600 font-semibold": "border-transparent"}`}>Completed</button>
+</div>
+{/* GROUPED TASKS */}
+{sortedDates.length === 0 && (<p className="text-gray-500">No tasks found</p>)}
+{sortedDates.map(dateKey => (
+<div key={dateKey} className="mb-8">
+{/* DATE HEADER */}
+<h2 className="text-lg font-semibold mb-4">{formatDate(dateKey)}</h2>
+{/* CARD GRID */}
+<div className="grid md:grid-cols-3 gap-4">
+{groupedTodos[dateKey].map(todo => (
+<div key={todo.id}className={`p-4 rounded-xl shadow ${todo.completed? "bg-green-100": "bg-blue-100"}`}>
+<div className="flex justify-between">
+<div className="flex gap-2 items-center">
+<input type="checkbox"checked={todo.completed}onChange={()=>toggleTodo(todo)}/>
 <span>{todo.title}</span>
-
-<span className={todo.completed ? "text-green-600" : "text-red-500"}>
-  {todo.completed ? "Completed" : "Pending"}
-</span>
-            </div> 
-         
-          
-          <div className="flex gap-1">
-            <button
-            onClick={()=>{
-              setEditingId(todo.id);
-              setEditTitle(todo.title);
-            }}
-            className="bg-blue-500 py-1 px-2 rounded-md text-white"
-          >
-            Edit
-          </button>
-
-          <button className="bg-red-500 px-2 py-1 rounded-md text-white" onClick={()=>deleteTodo(todo.id)}>
-            Delete
-          </button>
-          </div>
-          
-        </>
-
-      )}
-
-    </li>
-  ))}
-</ul>
-
- </div>
- );
+</div>
+<div className="flex gap-2">
+<button onClick={()=>router.push(`/todo/edit/${todo.id}`)}className="bg-blue-500 p-1 rounded text-white"><MdModeEditOutline/></button>
+<button onClick={()=>deleteTodo(todo.id)}className="bg-red-500 p-1 rounded text-white"><RiDeleteBin6Fill/></button>
+</div>
+</div>
+</div>
+))}
+</div>
+</div>
+))}
+</div>
+)
 }
+
+
