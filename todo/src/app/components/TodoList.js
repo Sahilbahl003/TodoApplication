@@ -89,7 +89,7 @@ return (
 {groupedTodos[dateKey].map(todo => (
 <div key={todo.id}className={`p-4 rounded-xl shadow ${todo.completed? "bg-green-100": "bg-blue-100"}`}>
 <div className="flex justify-between">
-<div className="flex gap-2 items-center">
+<div className="flex gap-2 items-center ">
 <input type="checkbox"checked={todo.completed}onChange={()=>toggleTodo(todo)}/>
 <span>{todo.title}</span>
 </div>
