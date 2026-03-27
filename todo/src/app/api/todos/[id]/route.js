@@ -69,12 +69,12 @@ export async function DELETE(req, { params }) {
     [id]
   );
 
-  if (result.rows.length === 0) {
+  if (result.rows.length === 0)  {
     return new Response(
       JSON.stringify({ message: "Todo not found" }),
       { status: 404 }
     );
   }
 
-  return Response.json({ message: "Deleted successfully" });
+  return Response.json({ message: "Deleted  successfully" });
 }
