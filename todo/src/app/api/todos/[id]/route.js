@@ -13,7 +13,7 @@ export async function GET(req, { params }) {
   }
 
   const result = await pool.query(
-    "SELECT * FROM todos WHERE id = $1",
+    "SELECT id, title, completed, todo_date::text FROM todos WHERE id = $1",
     [id]
   );
 
@@ -42,12 +42,12 @@ export async function PUT(req, { params }) {
   }
 
   const result = await pool.query(
-    `UPDATE todos
-     SET title=$1, completed=$2, todo_date=$3
-     WHERE id=$4
-     RETURNING *`,
-    [title, completed, todo_date, id]
-  );
+  `UPDATE todos
+   SET title=$1, completed=$2, todo_date=$3
+   WHERE id=$4
+   RETURNING id, title, completed, todo_date::text`,
+  [title, completed, todo_date, id]
+);
 
   if (result.rows.length === 0) {
     return new Response(

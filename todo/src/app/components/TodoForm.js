@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation"
 export default function TodoForm({todo}){
 const router = useRouter()
 const [title,setTitle] = useState(todo?.title || "");
-const [date,setDate] = useState(todo?.todo_date?.split("T")[0] || "")
+const [date,setDate] = useState(todo?.todo_date || "")
 const [error,setError] = useState("")
 const isEdit = !!todo
 async function handleSubmit(e){

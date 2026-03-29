@@ -11,7 +11,15 @@ return `${day}/${month}/${year.slice(-2)}`}
 async function deleteTodo(id){await fetch(`/api/todos/${id}`,{method:"DELETE"});setTodos(prev => prev.filter(t => t.id !== id));}
 /* TOGGLE */
 async function toggleTodo(todo){
-const res = await fetch(`/api/todos/${todo.id}`,{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify({title:todo.title,completed:!todo.completed,todo_date:todo.todo_date?.split("T")[0]})})
+const res = await fetch(`/api/todos/${todo.id}`,{
+method:"PUT",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({
+title:todo.title,
+completed:!todo.completed,
+todo_date: todo.todo_date ? todo.todo_date.slice(0,10) : null
+})
+})
 const updated = await res.json()
 setTodos(prev =>prev.map(t => t.id === updated.id ? updated : t))
 }
@@ -19,7 +27,7 @@ setTodos(prev =>prev.map(t => t.id === updated.id ? updated : t))
 const dates = [...new Set(todos.map(t => t.todo_date?.slice(0,10)))]
 /* FILTER TODOS */
 const filteredTodos = todos.filter(todo => {
-const rawDate = todo.todo_date?.split("T")[0]
+const rawDate = todo.todo_date
 const matchDate = selectedDate ? rawDate === selectedDate : true
 const matchSearch = todo.title.toLowerCase().includes(search.toLowerCase())
 const matchTab =activeTab === "active"? !todo.completed: todo.completed

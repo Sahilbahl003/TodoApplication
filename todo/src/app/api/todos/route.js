@@ -2,8 +2,9 @@ import pool from "../../../../lib/db";
 
 export async function GET() {
   const result = await pool.query(
-    "SELECT * FROM todos ORDER BY id DESC"
+    "SELECT id, title, completed, todo_date::text FROM todos ORDER BY id DESC"
   );
+
   return Response.json(result.rows);
 }
 
