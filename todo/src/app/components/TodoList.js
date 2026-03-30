@@ -1,31 +1,65 @@
 "use client";
-import { useState } from "react";import { useRouter } from "next/navigation";import { MdModeEditOutline } from "react-icons/md";import { RiDeleteBin6Fill } from "react-icons/ri";
+import { useEffect, useState } from "react";import { useRouter } from "next/navigation";
+import { MdModeEditOutline } from "react-icons/md";
+import { RiDeleteBin6Fill } from "react-icons/ri";
+
 export default function TodoList({ initialTodos }) {
+
 const router = useRouter();
-const [todos, setTodos] = useState(initialTodos);const [selectedDate, setSelectedDate] = useState("");const [search, setSearch] = useState("");const [activeTab, setActiveTab] = useState("active");
+const [todos, setTodos] = useState(initialTodos);
+
+useEffect(() => {
+  setTodos(initialTodos);
+}, [initialTodos]);
+
+console.log("todo in todo list",todos);
+const [selectedDate, setSelectedDate] = useState("");
+const [search, setSearch] = useState("");
+const [activeTab, setActiveTab] = useState("active");
+
 /* FORMAT DATE */
 function formatDate(date){if(!date) return ""
 const [year,month,day] = date.split("T")[0].split("-")
 return `${day}/${month}/${year.slice(-2)}`}
+
 /* DELETE */
-async function deleteTodo(id){await fetch(`/api/todos/${id}`,{method:"DELETE"});setTodos(prev => prev.filter(t => t.id !== id));}
+async function deleteTodo(id)
+{
+  const token = localStorage.getItem("token")
+  await fetch(`/api/todos/${id}`,{method:"DELETE",headers:{Authorization: `Bearer ${token}`}})
+  setTodos(prev => prev.filter(t => t.id !== id));
+}
+
 /* TOGGLE */
 async function toggleTodo(todo){
+const token = localStorage.getItem("token")
+
 const res = await fetch(`/api/todos/${todo.id}`,{
-method:"PUT",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify({
-title:todo.title,
-completed:!todo.completed,
-todo_date: todo.todo_date ? todo.todo_date.slice(0,10) : null
+  method:"PUT",
+  headers:{
+    "Content-Type":"application/json",
+    Authorization: `Bearer ${token}`
+  },
+  body:JSON.stringify({
+    title:todo.title,
+    completed:!todo.completed,
+    todo_date: todo.todo_date
+      ? todo.todo_date
+      : null
+  })
 })
-})
+
 const updated = await res.json()
-setTodos(prev =>prev.map(t => t.id === updated.id ? updated : t))
+setTodos(prev => prev.map(t => t.id === updated.id ? updated : t))
 }
+
+
 /* UNIQUE DATES FOR DROPDOWN */
 const dates = [...new Set(todos.map(t => t.todo_date?.slice(0,10)))]
+
 /* FILTER TODOS */
+
+
 const filteredTodos = todos.filter(todo => {
 const rawDate = todo.todo_date
 const matchDate = selectedDate ? rawDate === selectedDate : true
@@ -74,11 +108,19 @@ return (
 
   {/* RIGHT SIDE */}
   <button
-    onClick={()=>router.push("/todo/new")}
-    className="bg-blue-600 text-white px-4 py-2 rounded-md ml-4"
-  >
-    + Add New
-  </button>
+  onClick={()=>{
+    const token = localStorage.getItem("token")
+
+    if(!token){
+      router.push("/login")
+    }else{
+      router.push("/todo/new")
+    }
+  }}
+  className="bg-blue-600 text-white px-4 py-2 rounded-md ml-4"
+>
+  + Add New
+</button>
 
 </div>
 {/* TABS */}
