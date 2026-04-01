@@ -10,6 +10,7 @@ export default function RegisterForm(){
   const [name,setName] = useState("");
   const [email,setEmail] = useState("");
   const [password,setPassword] = useState("");
+  const[error,setError] = useState("");
 
   async function handleSubmit(e){
 
@@ -23,8 +24,15 @@ export default function RegisterForm(){
       body:JSON.stringify({name,email,password})
     });
 
+    const data = await res.json();
+   
     if(res.ok){
       router.push("/login");
+    }
+    else{
+      console.log("Registration failed", res);
+      //const data = await res.json();
+ setError(data.message || "Registration failed");
     }
 
   }
@@ -53,6 +61,10 @@ export default function RegisterForm(){
       required
       />
 
+       {/* <p className="text-red-500 text-sm">
+        {error}
+      </p> */}
+
       <input
       type="password"
       placeholder="Password"
@@ -62,10 +74,24 @@ export default function RegisterForm(){
       />
 
       <button
-      className="w-full bg-blue-500 text-white p-3 rounded-lg hover:bg-blue-600"
+      className="w-full bg-blue-500 text-white p-3 rounded-lg hover:bg-blue-600 cursor-pointer"
       >
       Create Account
       </button>
+
+      <p className="text-sm text-center">
+        Have an account? 
+        <span
+        onClick={()=>router.push("/login")}
+        className="text-blue-500 cursor-pointer ml-1"
+        >
+        Login
+        </span>
+      </p>
+
+      <p className="text-red-500 text-sm ">
+        {error}
+      </p>
 
     </form>
 

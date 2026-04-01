@@ -1,15 +1,13 @@
 "use client"
 
-//import TodoList from "./components/TodoList";
-import { useEffect,useState } from "react";
+import { useEffect, useState } from "react";
 import TodoList from "../components/TodoList";
+import Sidebar from "../components/Sidebar";
 
-export default function Page(){
+export default function Page({ selectedDate }) {
 
 const [todos,setTodos] = useState([])
-
-
-console.log("todos in page.js after use state",todos);
+const [search,setSearch] = useState("")
 
 useEffect(()=>{
 
@@ -18,8 +16,8 @@ async function getTodos(){
 const token = localStorage.getItem("token")
 
 if(!token){
-  setTodos([])
-  return
+setTodos([])
+return
 }
 
 const res = await fetch("/api/todos",{
@@ -27,17 +25,39 @@ headers:{Authorization: `Bearer ${token}`}
 })
 
 const data = await res.json()
-console.log("todos in page.js after fetch",data)
 
 setTodos(Array.isArray(data) ? data : [])
+
 }
 
 getTodos()
 
 },[])
 
-return <TodoList initialTodos={todos}/>
+return (
 
+<div className="flex">
+
+<Sidebar
+initialTodos={todos}
+calendarDate={selectedDate}
+search={search}
+setSearch={setSearch}
+/>
+
+<div className="ml-10 w-full">
+
+<TodoList
+initialTodos={todos}
+calendarDate={selectedDate}
+search={search}
+setSearch={setSearch}
+/>
+
+</div>
+
+</div>
+
+)
 }
 
-//inside todo list i got empty array thats why i havent get todo in hope page 

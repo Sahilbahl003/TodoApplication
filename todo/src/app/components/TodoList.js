@@ -1,20 +1,23 @@
 "use client";
-import { useEffect, useState } from "react";import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { MdModeEditOutline } from "react-icons/md";
 import { RiDeleteBin6Fill } from "react-icons/ri";
+import { useDate } from "@/context/DateContext"
+import Link from "next/link";
 
-export default function TodoList({ initialTodos }) {
+export default function TodoList({ initialTodos, calendarDate, search, setSearch })
+ {
 
 const router = useRouter();
 const [todos, setTodos] = useState(initialTodos);
+const { selectedDate } = useDate();
 
 useEffect(() => {
   setTodos(initialTodos);
 }, [initialTodos]);
 
 console.log("todo in todo list",todos);
-const [selectedDate, setSelectedDate] = useState("");
-const [search, setSearch] = useState("");
 const [activeTab, setActiveTab] = useState("active");
 
 /* FORMAT DATE */
@@ -58,15 +61,36 @@ setTodos(prev => prev.map(t => t.id === updated.id ? updated : t))
 const dates = [...new Set(todos.map(t => t.todo_date?.slice(0,10)))]
 
 /* FILTER TODOS */
-
-
 const filteredTodos = todos.filter(todo => {
+
 const rawDate = todo.todo_date
-const matchDate = selectedDate ? rawDate === selectedDate : true
-const matchSearch = todo.title.toLowerCase().includes(search.toLowerCase())
-const matchTab =activeTab === "active"? !todo.completed: todo.completed
-return matchDate && matchSearch && matchTab
+
+const matchCalendar = calendarDate
+  ? rawDate?.split("T")[0] === calendarDate
+  : true
+
+const matchDate = selectedDate
+  ? rawDate?.slice(0,10) === selectedDate
+  : true
+
+const matchTitle = todo.title.toLowerCase().includes(search.toLowerCase())
+
+const matchLabel = todo.labels?.some(label =>
+  label.name.toLowerCase().includes(search.toLowerCase())
+)
+
+const matchSearch = matchTitle || matchLabel
+
+const matchTab = activeTab === "active"
+  ? !todo.completed
+  : todo.completed
+
+return matchDate && matchCalendar && matchSearch && matchTab
+
 })
+
+
+
 /* GROUP BY DATE */
 const groupedTodos = filteredTodos.reduce((acc,todo)=>{
 const dateKey = todo.todo_date?.split("T")[0]
@@ -74,40 +98,33 @@ if(!acc[dateKey]){acc[dateKey] = []}
 acc[dateKey].push(todo)
 return acc
 },{})
+
 /* SORT DATES */
 const sortedDates = Object.keys(groupedTodos).sort((a,b)=> new Date(a) - new Date(b))
 return (
-<div className="w-[1200px] p-10 rounded-xl mt-5 mx-auto p-6 bg-blue-50">
+<div className="w-full p-10 rounded-xl mx-auto p-6 bg-blue-50">
+
 {/* TOP BAR */}
 <div className="flex items-center justify-between mb-6">
 
   {/* LEFT SIDE */}
   <div className="flex items-center gap-3">
 
-    <select
-      className="border p-2 rounded-md bg-white"
-      value={selectedDate}
-      onChange={(e)=>setSelectedDate(e.target.value)}
-    >
-      <option value="">All Dates</option>
-      {dates.map(d=>(
-        <option key={d} value={d}>
-          {formatDate(d)}
-        </option>
-      ))}
-    </select>
-
-    <input
-      placeholder="Search List"
-      value={search}
-      onChange={(e)=>setSearch(e.target.value)}
-      className="border px-3 py-2 rounded-md bg-white"
-    />
-
+    
   </div>
 
-  {/* RIGHT SIDE */}
-  <button
+  
+</div>
+{/* TABS */}
+
+<div className="flex justify-between">
+
+<div className="flex gap-6 mb-4">
+<button onClick={()=>setActiveTab("active")}className={`pb-1 cursor-pointer border-b-2 ${activeTab==="active"? "border-blue-600 font-semibold": "border-transparent"}`}>Active Task</button>
+<button onClick={()=>setActiveTab("completed")}className={`pb-1 cursor-pointer border-b-2 ${activeTab==="completed"? "border-green-600 font-semibold": "border-transparent"}`}>Completed</button>
+</div>
+
+<button
   onClick={()=>{
     const token = localStorage.getItem("token")
 
@@ -117,40 +134,61 @@ return (
       router.push("/todo/new")
     }
   }}
-  className="bg-blue-600 text-white px-4 py-2 rounded-md ml-4"
+  className="bg-blue-600 text-white px-4 rounded-md ml-4 cursor-pointer"
 >
   + Add New
 </button>
 
 </div>
-{/* TABS */}
-<div className="flex gap-6 mb-6">
-<button onClick={()=>setActiveTab("active")}className={`pb-1 border-b-2 ${activeTab==="active"? "border-blue-600 font-semibold": "border-transparent"}`}>Active Task</button>
-<button onClick={()=>setActiveTab("completed")}className={`pb-1 border-b-2 ${activeTab==="completed"? "border-green-600 font-semibold": "border-transparent"}`}>Completed</button>
-</div>
+
+
 {/* GROUPED TASKS */}
 {sortedDates.length === 0 && (<p className="text-gray-500">No tasks found</p>)}
 {sortedDates.map(dateKey => (
 <div key={dateKey} className="mb-8">
 {/* DATE HEADER */}
-<h2 className="text-lg font-semibold mb-4">{formatDate(dateKey)}</h2>
+{/* <h2 className="text-lg font-semibold mb-4">{formatDate(dateKey)}</h2> */}
+
 {/* CARD GRID */}
-<div className="grid md:grid-cols-3 gap-4">
+
+<div className="grid md:grid-cols-3 gap-4 mt-2">
 {groupedTodos[dateKey].map(todo => (
 <div key={todo.id}className={`p-4 rounded-xl shadow ${todo.completed? "bg-green-100": "bg-blue-100"}`}>
 <div className="flex justify-between">
-<div className="flex gap-2 items-center ">
-<input type="checkbox"checked={todo.completed}onChange={()=>toggleTodo(todo)}/>
-<span>{todo.title}</span>
+<div className="flex gap-2 items-center cursor-pointer">
+<input className="cursor-pointer" type="checkbox" checked={todo.completed} onChange={()=>toggleTodo(todo)}/>
+<div className="flex flex-col">
+  <p className="text-xs text-zinc-400 italic">{formatDate(dateKey)}</p>
+<Link href={`/todos/${todo.id}`} className="text-blue-600 hover:underline">
+  <span>{todo.title}</span>
+</Link>
+
+<div className="flex gap-2 flex-wrap mt-2">
+
+{todo.labels?.map(label=>(
+<span
+key={label.id}
+className="bg-purple-200 text-xs px-2 py-1 rounded"
+>
+{label.name}
+</span>
+))}
+
+</div>
+
+
+</div>
+
 </div>
 <div className="flex gap-2">
-<button onClick={()=>router.push(`/todo/edit/${todo.id}`)}className="bg-blue-500 p-1 rounded text-white"><MdModeEditOutline/></button>
-<button onClick={()=>deleteTodo(todo.id)}className="bg-red-500 p-1 rounded text-white"><RiDeleteBin6Fill/></button>
+{/* <button onClick={()=>router.push(`/todo/edit/${todo.id}`)}className="bg-blue-500 p-1 cursor-pointer rounded text-white"><MdModeEditOutline/></button> */}
+<button onClick={()=>deleteTodo(todo.id)}className="text-red-600 p-1 cursor-pointer rounded text-white"><RiDeleteBin6Fill className="text-red-500 text-xl"/></button>
 </div>
 </div>
 </div>
 ))}
 </div>
+
 </div>
 ))}
 </div>

@@ -1,19 +1,31 @@
-// src/app/(protected)/layout.js
+"use client"
 
-import Navbar from "../components/Navbar";
+import Navbar from "../components/Navbar"
+import Sidebar from "../components/Sidebar"
+import { DateProvider } from "@/context/DateContext"
 
 export default function ProtectedLayout({ children }) {
+
   return (
-    <div className="min-h-screen flex flex-col">
 
-      {/* Top Navbar */}
-      <Navbar />
+    <DateProvider>
 
-      {/* Page Content */}
-      <main className="flex-1 p-6">
-        {children}
-      </main>
+      <div className="min-h-screen bg-gray-100">
 
-    </div>
-  );
+        {/* Sidebar */}
+        <Sidebar />
+
+        {/* Navbar */}
+        <Navbar />
+
+        {/* Main Content */}
+        <div className="ml-72 pt-16 p-6">
+          {children}
+        </div>
+
+      </div>
+
+    </DateProvider>
+
+  )
 }

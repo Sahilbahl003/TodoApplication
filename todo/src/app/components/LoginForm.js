@@ -27,10 +27,10 @@ export default function LoginForm(){
 
     if(res.ok){
 
-      // ✅ STORE TOKEN (already you had)
+    
       localStorage.setItem("token",data.token);
 
-      // ✅ ADD THIS → STORE USER
+      
       localStorage.setItem("user", JSON.stringify({
         email: data.email || email,
         name: data.name || email.charAt(0).toUpperCase()
@@ -47,7 +47,7 @@ export default function LoginForm(){
 
     <form onSubmit={handleSubmit} className="space-y-5">
 
-      <h2 className="text-2xl font-bold text-blue-500">
+      <h2 className="text-2xl font-bold text-blue-500 ">
         Login
       </h2>
 
@@ -60,6 +60,8 @@ export default function LoginForm(){
       required
       />
 
+      
+
       <input
       type="password"
       placeholder="Enter password"
@@ -69,8 +71,14 @@ export default function LoginForm(){
       required
       />
 
+      
+
+       <p className="text-red-500 text-sm ">
+        {error}
+      </p>
+
       <button
-      className="w-full bg-blue-500 text-white p-3 rounded-lg hover:bg-blue-600"
+      className="w-full bg-blue-500 text-white p-3 rounded-lg hover:bg-blue-600 cursor-pointer"
       >
       Login
       </button>
@@ -85,9 +93,7 @@ export default function LoginForm(){
         </span>
       </p>
 
-      <p className="text-red-500 text-sm">
-        {error}
-      </p>
+     
 
     </form>
 

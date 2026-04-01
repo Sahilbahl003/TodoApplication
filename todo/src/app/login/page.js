@@ -4,7 +4,7 @@ export default function LoginPage(){
 
   return (
 
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
+    <div className="min-h-screen flex items-center justify-center">
 
       <div className="bg-white rounded-xl shadow-lg grid grid-cols-2 w-[900px]">
 
@@ -16,7 +16,7 @@ export default function LoginPage(){
           </h2>
 
           <p className="text-blue-400">
-            Shop Now !!
+            Please login to craate and manage your todos
           </p>
 
         </div>

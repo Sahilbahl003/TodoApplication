@@ -1,20 +1,19 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useParams } from "next/navigation"   // ✅ IMPORTANT
+import { useParams } from "next/navigation"   
 import TodoForm from "@/app/components/TodoForm"
 
 export default function Page() {
 
-  const params = useParams();        // ✅ FIX
-  const id = params?.id;             // ✅ FIX
+  const params = useParams();      
+  const id = params?.id;            
 
   const [todo, setTodo] = useState(null);
 
   useEffect(() => {
 
-    if (!id) return;                 // ✅ VERY IMPORTANT (prevents undefined call)
-
+    if (!id) return;          
     async function getTodo() {
       const token = localStorage.getItem("token");
 
@@ -28,7 +27,7 @@ export default function Page() {
 
     getTodo();
 
-  }, [id]);                          // ✅ dependency added
+  }, [id]);                        
 
   if (!todo) return null;
 

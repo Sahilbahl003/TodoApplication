@@ -1,22 +1,39 @@
 "use client"
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation"
+import { useRouter } from "next/navigation";
+import QuillEditor from "./QuillEditor";
 
 export default function TodoForm({todo}){
 
 const router = useRouter()
 
-const [title,setTitle] = useState(todo?.title || "");
+const [title,setTitle] = useState(todo?.title || "")
+const [description,setDescription] = useState(todo?.description || "")
 
-// ✅ FIX: DO NOT use toString()
+const [labels,setLabels] = useState([])
+const [selectedLabels,setSelectedLabels] = useState([])
+
 const [date,setDate] = useState(
   todo?.todo_date
     ? todo.todo_date
     : ""
-);
+)
 
 const [error,setError] = useState("")
-const isEdit = !!todo
+const isEdit = !!todo;
+
+useEffect(()=>{
+
+const token = localStorage.getItem("token")
+
+fetch("/api/labels",{
+ headers:{Authorization:`Bearer ${token}`}
+})
+.then(res=>res.json())
+.then(setLabels)
+
+},[])
+
 
 async function handleSubmit(e){
   e.preventDefault()
@@ -26,28 +43,46 @@ async function handleSubmit(e){
   const url = isEdit ? `/api/todos/${todo.id}` : "/api/todos"
   const method = isEdit ? "PUT" : "POST"
 
-  // ✅ KEEP RAW DATE (correct)
   const safeDate = date || null
 
   const res = await fetch(url,{
     method,
     headers:{
       "Content-Type":"application/json",
-      Authorization: `Bearer ${token}`
+      Authorization:`Bearer ${token}`
     },
     body: JSON.stringify({
       title,
-      todo_date: safeDate,
+      description,
+      todo_date:safeDate,
       completed: todo?.completed || false
     })
   })
 
   const data = await res.json()
 
-  if(!res.ok){
-    setError(data.message)
-    return
-  }
+if(!res.ok){
+  setError(data.message)
+  return
+}
+
+
+
+if(selectedLabels.length > 0){
+
+await fetch(`/api/todos/${data.id}/labels`,{
+method:"POST",
+headers:{
+"Content-Type":"application/json",
+Authorization:`Bearer ${token}`
+},
+body:JSON.stringify({
+labelIds:selectedLabels
+})
+})
+
+}
+
 
   router.push("/")
   router.refresh()
@@ -62,6 +97,7 @@ useEffect(()=>{
 },[])
 
 return(
+
 <div className="max-w-md mx-auto mt-10 p-6 border rounded-lg bg-blue-50 p-10">
 
 <h2 className="text-xl text-blue-600 font-semibold mb-4">
@@ -77,6 +113,53 @@ placeholder="Task Name"
 className="border p-2 rounded bg-white"
 />
 
+<p>Description:</p>
+<QuillEditor
+value={description}
+setValue={setDescription}
+/>
+
+<div>
+
+<p className="mt-3">Select Labels:</p>
+
+<div className="flex gap-2 flex-wrap mt-2">
+
+{labels.map(label=>(
+
+<button
+key={label.id}
+type="button"
+onClick={()=>{
+
+setSelectedLabels(prev=>
+
+prev.includes(label.id)
+? prev.filter(id=>id!==label.id)
+: [...prev,label.id]
+
+)
+
+}}
+className={`px-2 py-1 rounded text-sm ${
+selectedLabels.includes(label.id)
+? "bg-blue-600 text-white"
+: "bg-gray-200"
+}`}
+>
+
+{label.name}
+
+</button>
+
+))}
+
+</div>
+
+</div>
+
+
+
 <input
 type="date"
 min={new Date(Date.now() - new Date().getTimezoneOffset()*60000)
@@ -89,12 +172,14 @@ className="border p-2 rounded bg-white"
 
 {error && <p className="text-red-500 text-sm">{error}</p>}
 
-<button className="bg-blue-600 text-white py-2 rounded">
+<button className="bg-blue-600 text-white py-2 rounded cursor-pointer">
 {isEdit ? "Update" : "Add"}
 </button>
 
 </form>
 
 </div>
+
 )
+
 }

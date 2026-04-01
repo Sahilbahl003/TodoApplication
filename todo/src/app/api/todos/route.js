@@ -17,11 +17,11 @@ export async function GET(req) {
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    // ✅ FIX HERE
+    
     const result = await pool.query(
-      "SELECT id, title, completed, todo_date::text FROM todos WHERE user_id=$1",
-      [decoded.id]
-    );
+  "SELECT t.id,t.title,t.description,t.completed,t.todo_date::text,COALESCE(json_agg(json_build_object('id',l.id,'name',l.name)) FILTER (WHERE l.id IS NOT NULL),'[]') as labels FROM todos t LEFT JOIN todo_labels tl ON t.id = tl.todo_id LEFT JOIN labels l ON l.id = tl.label_id WHERE t.user_id=$1 GROUP BY t.id",
+  [decoded.id]
+);
 
     return NextResponse.json(result.rows);
   } catch {
@@ -45,7 +45,7 @@ export async function POST(req) {
   const token = authHeader.split(" ")[1];
 
   try {
-    const { title, todo_date } = await req.json();
+    const { title, description, todo_date } = await req.json();
 
     if (!title || !title.trim()) {
       return NextResponse.json(
@@ -57,9 +57,11 @@ export async function POST(req) {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     const result = await pool.query(
-      "INSERT INTO todos(title, todo_date, user_id) VALUES($1,$2,$3) RETURNING id, title, completed, todo_date::text",
-      [title, todo_date, decoded.id]
-    );
+  `INSERT INTO todos(title, description, todo_date, user_id)
+   VALUES($1,$2,$3,$4)
+   RETURNING id, title, description, completed, todo_date::text`,
+  [title, description, todo_date, decoded.id]
+);
 
     return NextResponse.json(result.rows[0], { status: 201 });
 
