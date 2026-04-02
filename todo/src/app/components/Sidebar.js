@@ -26,11 +26,15 @@ useEffect(()=>{
 
 const token = localStorage.getItem("token")
 
+if(!token)
+{
+  return router.push("/")
+}
+
+
 fetch("/api/labels",{
  headers:{Authorization:`Bearer ${token}`}
-})
-.then(res=>res.json())
-.then(setLabels)
+}).then(res=>res.json()).then(setLabels)
 
 },[])
 
@@ -146,7 +150,8 @@ All Tasks
 
 {/* CALENDAR */}
 
-<CalendarBox onDateChange={handleDateChange} />
+<CalendarBox 
+onDateChange={handleDateChange}/>
 
 <div className="mt-6">
 

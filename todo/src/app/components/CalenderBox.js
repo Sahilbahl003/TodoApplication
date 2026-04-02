@@ -22,10 +22,7 @@ export default function CalendarBox({ onDateChange }) {
 
     <div className="bg-white text-black rounded p-2">
 
-      <Calendar
-        onChange={handleDateChange}
-        value={date}
-      />
+      <Calendar onChange={handleDateChange} value={date}/>
 
     </div>
 
