@@ -1,7 +1,14 @@
 "use client"
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import QuillEditor from "./QuillEditor";
+import dynamic from "next/dynamic";
+
+// import QuillEditor from "./QuillEditor";
+
+const QuillEditor=dynamic(()=>
+import("./QuillEditor"),{
+  ssr:false,
+})
 
 export default function TodoForm({todo}){
 

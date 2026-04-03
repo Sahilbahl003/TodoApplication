@@ -9,9 +9,6 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "@tiptap/extension-placeholder": "^3.21.0",
-    "@tiptap/react": "^3.21.0",
-    "@tiptap/starter-kit": "^3.21.0",
     "bcrypt": "^6.0.0",
     "date-fns": "^4.1.0",
     "jsonwebtoken": "^9.0.3",
