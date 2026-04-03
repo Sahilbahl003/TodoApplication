@@ -13,7 +13,8 @@ const { setSelectedDate } = useDate();
 const router = useRouter();
 const [labels,setLabels] = useState([])
 const [showModal,setShowModal] = useState(false)
-const [newLabel,setNewLabel] = useState("")
+const [newLabel,setNewLabel] = useState("");
+const [labelError,setLabelError] = useState("");
 
 
 const [todos, setTodos] = useState(initialTodos || []);
@@ -189,40 +190,22 @@ className="bg-blue-600 p-2 rounded text-sm"
 
 <div className="bg-white p-4 rounded text-black">
 
-<input
-value={newLabel}
-onChange={(e)=>setNewLabel(e.target.value)}
-placeholder="Label name"
-className="border p-2"
-/>
+<input value={newLabel} onChange={(e)=>{setNewLabel(e.target.value); setLabelError("")}} placeholder="Label name" className="border p-2"/>
+{labelError && (<p className="text-red-500 text-sm mt-1">{labelError}</p>)}
 
-<button
-onClick={async()=>{
-
+<button onClick={async()=>{
+if(!newLabel.trim())
+{setLabelError("Label is required");return}
+setLabelError("")
 const token = localStorage.getItem("token")
-
-const res = await fetch("/api/labels",{
-method:"POST",
-headers:{
-"Content-Type":"application/json",
-Authorization:`Bearer ${token}`
-},
-body:JSON.stringify({name:newLabel})
-})
-
+const res = await fetch("/api/labels",{method:"POST",
+headers:{"Content-Type":"application/json",Authorization:`Bearer ${token}`},
+body:JSON.stringify({name:newLabel})})
 const data = await res.json()
-
 setLabels(prev=>[...prev,data])
 setShowModal(false)
-setNewLabel("")
-
-}}
-className="bg-blue-600 text-white px-3 py-1 ml-2 rounded"
->
-
-Add
-
-</button>
+setNewLabel("")}}
+className="bg-blue-600 text-white px-3 py-1 ml-2 rounded">Add</button> 
 
 </div>
 
