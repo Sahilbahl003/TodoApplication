@@ -38,7 +38,7 @@ const error = validateField(name,value,updated);
 
 let confirmError = errors.confirmPassword;
 
-if(name==="password" || name==="confirmPassword"){
+if(name === "password" && updated.confirmPassword){
 
 confirmError = validateField(
 "confirmPassword",
@@ -51,14 +51,10 @@ updated
 setErrors((prev)=>({
 ...prev,
 [name]:error,
-confirmPassword:confirmError
+...(name === "password" ? { confirmPassword: confirmError } : {})
 }));
 
 };
-
-
-
-/* ---------------- BLUR HANDLER ---------------- */
 
 const blurHandler = (e)=>{
 
@@ -68,7 +64,7 @@ const error = validateField(name,value,formData);
 
 let confirmError = errors.confirmPassword;
 
-if(name==="password" || name==="confirmPassword"){
+if(name === "password" || name === "confirmPassword"){
 
 confirmError = validateField(
 "confirmPassword",
@@ -81,10 +77,14 @@ formData
 setErrors((prev)=>({
 ...prev,
 [name]:error,
-confirmPassword:confirmError
+...(name === "password" || name === "confirmPassword"
+? { confirmPassword: confirmError }
+: {})
 }));
 
 };
+
+
 
 
 
@@ -125,6 +125,7 @@ router.push("/login");
 }else{
 
 setFormError(data.message || "Registration failed");
+toast.error(data.message );
 
 }
 
@@ -279,11 +280,11 @@ Login
 </p>
 
 
-{formError && (
+{/* {formError && (
 <p className="text-red-500 text-sm text-center">
 {formError}
 </p>
-)}
+)} */}
 
 </form>
 

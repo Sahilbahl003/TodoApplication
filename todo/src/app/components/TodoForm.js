@@ -23,7 +23,7 @@ const [selectedLabels,setSelectedLabels] = useState([])
 const [date,setDate] = useState(
   todo?.todo_date
     ? todo.todo_date
-    : ""
+    : new Date().toISOString().split("T")[0]
 )
 
 const [error,setError] = useState("")
@@ -89,8 +89,6 @@ labelIds:selectedLabels
 })
 
 }
-
-
   router.push("/")
   router.refresh()
 }
@@ -148,7 +146,7 @@ prev.includes(label.id)
 )
 
 }}
-className={`px-2 py-1 rounded text-sm ${
+className={`px-2 py-1 rounded text-sm cursor-pointer ${
 selectedLabels.includes(label.id)
 ? "bg-blue-600 text-white"
 : "bg-gray-200"

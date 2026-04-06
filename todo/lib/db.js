@@ -1,7 +1,7 @@
 import { Pool } from "pg";
 
 const pool = new Pool({
- connectionString: 'postgresql://postgres:Sahil%40123@localhost:5432/tododb'
+ connectionString: 'postgresql://postgres:11111@postgres:5432/tododb'
 });
 
 export default pool;

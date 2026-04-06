@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { MdModeEditOutline } from "react-icons/md";
+import { IoIosArrowBack } from "react-icons/io";
 import "quill/dist/quill.snow.css"
 
 export default function TodoDetail(){
@@ -82,7 +83,13 @@ return <p>Loading...</p>
 
 return(
 <div className="">
-    <h1 className="text-2xl font-bold w-full text-center">Todo Detail</h1>
+    <div className="flex items-center gap-4 mb-6">
+        <button onClick={()=>router.push("/")} className="text-3xl cursor-pointer">
+              <IoIosArrowBack />
+        </button>
+         <h1 className="text-2xl font-bold w-full text-center">Todo Detail</h1>
+    </div>
+   
     <div className="max-w-2xl mx-auto mt-10 border p-6 rounded">
 
 <div className="flex items-center gap-2">

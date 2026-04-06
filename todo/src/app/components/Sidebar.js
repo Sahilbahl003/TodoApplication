@@ -23,6 +23,7 @@ useEffect(() => {
   setTodos(initialTodos || []);
 }, [initialTodos]);
 
+
 useEffect(()=>{
 
 const token = localStorage.getItem("token")
@@ -162,7 +163,7 @@ onDateChange={handleDateChange}/>
 
 <button
 onClick={()=>setShowModal(true)}
-className="bg-white text-black px-2 rounded"
+className="bg-white text-black px-2 rounded cursor-pointer"
 >
 +
 </button>
@@ -186,7 +187,13 @@ className="bg-blue-600 p-2 rounded text-sm"
 
 {showModal && (
 
+
+
 <div className="fixed inset-0 bg-black/40 flex items-center justify-center">
+
+<div className="flex flex-col ml-10">
+ 
+      <div className="cursor-pointer ml-87" onClick={()=>setShowModal(false)}>X</div>
 
 <div className="bg-white p-4 rounded text-black">
 
@@ -205,13 +212,17 @@ const data = await res.json()
 setLabels(prev=>[...prev,data])
 setShowModal(false)
 setNewLabel("")}}
-className="bg-blue-600 text-white px-3 py-1 ml-2 rounded">Add</button> 
+className="bg-blue-600 text-white px-3 py-1 ml-2 rounded cursor-pointer">Add</button> 
 
-</div>
+</div>  
+</div>  
+
+
 
 </div>
 
 )}
+
 
 
 

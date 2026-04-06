@@ -127,9 +127,9 @@ onClick={()=>setShowPassword(!showPassword)}
 </div>
 
 
-<p className="text-red-500 text-sm">
+{/* <p className="text-red-500 text-sm">
 {error}
-</p>
+</p> */}
 
 
 <button
