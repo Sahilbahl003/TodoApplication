@@ -1,5 +1,7 @@
 import Link from "next/link";
 import "./global.css";
+import "react-toastify/dist/ReactToastify.css";
+import { ToastContainer } from "react-toastify";
 
 export default function RootLayout({ children }) {
   return (
@@ -11,6 +13,7 @@ export default function RootLayout({ children }) {
         </h1>
 
         {children}
+        <ToastContainer position="top-right" />
 
       </body>
     </html>

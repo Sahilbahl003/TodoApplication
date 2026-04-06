@@ -2,18 +2,25 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "react-toastify";
+import { IoIosLogOut } from "react-icons/io";
 
 export default function UserMenu() {
+
   const [open, setOpen] = useState(false);
-  const [user, setUser] = useState(null); 
+  const [user, setUser] = useState(null);
   const [userInitial, setUserInitial] = useState("U");
+
   const menuRef = useRef(null);
   const router = useRouter();
 
+  // load user from localStorage
   useEffect(() => {
     const storedUser = JSON.parse(localStorage.getItem("user"));
+
     if (storedUser) {
-      setUser(storedUser); 
+      setUser(storedUser);
+
       if (storedUser?.name) {
         setUserInitial(storedUser.name.charAt(0).toUpperCase());
       }
@@ -27,31 +34,44 @@ export default function UserMenu() {
         setOpen(false);
       }
     }
+
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+
   }, []);
 
+  // logout handler
   function handleLogout() {
+
     localStorage.removeItem("token");
     localStorage.removeItem("user");
+
     setUser(null);
-    router.push("/login");
+    setOpen(false);
+
+    toast.success("Logout successful");
+
+    setTimeout(() => {
+      router.push("/login");
+    }, 700);
   }
 
   return (
+
     <div className="relative flex items-center gap-2 right-0" ref={menuRef}>
 
-      
       {!user && (
         <button
           onClick={() => router.push("/login")}
-          className="px-3 py-1 bg-blue-600  text-white text-lg cursor-pointer rounded hover:bg-blue-700"
+          className="px-3 py-1 bg-blue-600 text-white text-lg cursor-pointer rounded hover:bg-blue-700"
         >
           Login
         </button>
       )}
 
-     
       {user && (
         <>
           <div
@@ -63,16 +83,21 @@ export default function UserMenu() {
 
           {open && (
             <div className="absolute right-0 mt-30 w-32 bg-white border rounded shadow-md">
+
               <button
                 onClick={handleLogout}
-                className="w-full text-left px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                className="w-full text-left px-4 py-2 hover:bg-gray-100 cursor-pointer flex"
               >
-                Logout <span className="ml-2 text-xl text-red-500">►</span> 
+                Logout
+                <span className="ml-2 text-xl text-black"><IoIosLogOut /></span>
+
               </button>
+
             </div>
           )}
         </>
       )}
+
     </div>
   );
 }
